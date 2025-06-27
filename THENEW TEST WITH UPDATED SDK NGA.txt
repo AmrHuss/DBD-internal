@@ -1,0 +1,883 @@
+#pragma once
+#define _CRT_SECURE_NO_WARNINGS // Should be the first line, or among the very first
+#include "imgui_impl_win32.h" // <<< THIS IS NEEDED FOR THE DECLARATION
+#include "imgui_impl_dx11.h"
+
+#define d_toggle_bind 0x2D /* VK_INSERT */
+#include <imgui.h> // <-- Include ImGui's main header HERE
+
+namespace overlay
+{
+
+	extern bool enabled;                    
+
+	// Aimbot
+	extern bool aimbotEnabled;
+	extern bool triggerbotEnabled;
+	extern bool disableAimbotFlashed;
+	extern bool disableAimbotSmoke;
+	extern bool disableAimbotJump;
+
+	// ESP - Master & Player Visuals
+	extern bool espEnabled;                 
+	extern bool mainEspBoxEnabled;         
+	extern bool cornerEspBoxEnabled;       
+	extern bool boneEspEnabled;             
+	extern bool nameEspEnabled;             
+	extern bool healthBarEnabled;          
+	extern bool healthTextEnabled;          
+	extern bool distanceEspEnabled;        
+	extern bool snaplinesEnabled;           
+	extern bool headDotEnabled;             
+	extern bool glowEspEnabled;             
+
+	// ESP - World Visuals (Gadgets, Vehicles)
+	extern bool gadgetEspEnabled;
+	extern bool showGadgetName;
+	extern bool showGadgetDistance;
+	extern bool vehicleEspEnabled;
+	extern bool showVehicleName;
+	extern bool showVehicleDistance;
+	extern bool showVehicleRider;
+
+	// ESP - Screen Effects & Helpers
+	extern bool fovCircleEnabled;          
+	extern bool lineToClosestEnemyEnabled;  
+	extern bool radarEnabled;              
+
+	// Visuals - Chams
+	extern bool weaponChamsEnabled;
+
+	// Miscellaneous Features
+	extern bool bhopEnabled;              
+	extern bool teleport;                  
+
+
+	// --- Extern Non-Boolean Settings  ---
+	extern ImColor weaponChamsColorImGui;
+	extern float glowEspIntensity;
+	extern float healthBarWidth;
+	extern ImU32 snaplineColor;
+	extern float mainEspBoxColor[3];
+	extern ImU32 textEspColor;
+	extern float cornerEspBoxColor[3];
+	extern float headDotRadius;
+	extern ImU32 lineToEnemyColor;
+	extern float cornerEspBoxThickness;
+	extern float fovCircleRadius;
+	extern ImU32 fovCircleColor;
+	extern float distanceUnitConversion;
+	extern float mainEspBoxThickness;
+	extern float cornerFraction;
+	extern ImVec2 snaplineOrigin; 
+	extern ImU32 headDotColor;
+	extern float aimbotFov;
+	extern float aimbotSmoothness;
+	extern float espColor[3];
+	extern ImU32 gadgetEspColor;
+	extern ImU32 glowColor;
+	extern ImU32 vehicleEspColor;
+	extern ImU32 healthBarHighColor;
+	extern ImU32 healthBarMidColor;
+	extern ImU32 healthBarLowColor;
+	extern ImU32 friendlyEspColor;
+	extern ImU32 enemyEspColor;
+	extern ImU32 espVisibleColor;
+	extern ImU32 espOccludedColor;
+
+	// Function declarations
+	void InitializeColors();
+	void draw_gui();
+	void render();
+
+
+}
+#define _CRT_SECURE_NO_WARNINGS
+
+#include "Overlay/overlay.h" 
+#include <imgui.h>
+#include <windows.h>
+#include <imgui_impl_dx11.h> 
+#include <imgui_impl_win32.h> 
+#include <string>
+#include <string>
+#include "../Utils/Game.h" 
+#include "../Utils/Logger.h" 
+
+
+namespace overlay {
+   
+    bool enabled = true;
+
+    // --- Boolean Feature Toggles (All initialized to false by default) ---
+
+
+    // Aimbot & Triggerbot
+    bool aimbotEnabled = false;
+    bool triggerbotEnabled = false;
+    bool disableAimbotFlashed = false;
+    bool disableAimbotSmoke = false;
+    bool disableAimbotJump = false;
+
+    // ESP - Master & Player Visuals
+    bool espEnabled = false;              
+    bool mainEspBoxEnabled = false;
+    bool cornerEspBoxEnabled = false;
+    bool boneEspEnabled = false;         
+    bool nameEspEnabled = false;
+    bool healthBarEnabled = false;
+    bool healthTextEnabled = false;
+    bool distanceEspEnabled = false;
+    bool snaplinesEnabled = false;
+    bool headDotEnabled = false;
+    bool glowEspEnabled = false;
+
+    // ESP - World Visuals (Gadgets, Vehicles)
+    bool gadgetEspEnabled = false;
+    bool showGadgetName = false;
+    bool showGadgetDistance = false;
+    bool vehicleEspEnabled = false;
+    bool showVehicleName = false;
+    bool showVehicleDistance = false;
+    bool showVehicleRider = false;
+
+    // ESP - Screen Effects & Helpers
+    bool fovCircleEnabled = false;
+    bool lineToClosestEnemyEnabled = false;
+    bool radarEnabled = false;
+
+    // Visuals - Chams
+    bool weaponChamsEnabled = false;
+
+    // Miscellaneous Features
+    bool bhopEnabled = false;
+    bool teleport = false;
+
+
+    // --- Color & Visual Parameters ---
+
+    ImColor weaponChamsColorImGui = ImColor(255, 0, 255, 255); // Bright Pink
+
+   
+    ImU32 glowColor; 
+
+    // ESP Element Colors
+    float mainEspBoxColor[3] = { 1.0f, 0.0f, 0.0f };      // Default red for main box
+    float cornerEspBoxColor[3] = { 0.0f, 1.0f, 0.0f };  // Default green for corner box
+    float espColor[3] = { 0.0f, 1.0f, 0.0f };           // Default neon green for fallback/general ESP
+    ImU32 textEspColor;                                 // Initialized in InitializeColors()
+    ImU32 snaplineColor;                                // Initialized in InitializeColors()
+    ImU32 headDotColor;                                 // Initialized in InitializeColors()
+    ImU32 lineToEnemyColor;                             // Initialized in InitializeColors()
+    ImU32 fovCircleColor;                               // Initialized in InitializeColors()
+    ImU32 gadgetEspColor;                               // Initialized in InitializeColors()
+    ImU32 vehicleEspColor;                              // Initialized in InitializeColors()
+
+    // Health Bar Colors
+    ImU32 healthBarHighColor;                           // Initialized in InitializeColors()
+    ImU32 healthBarMidColor;                            // Initialized in InitializeColors()
+    ImU32 healthBarLowColor;                            // Initialized in InitializeColors()
+
+    // Team/State Colors
+    ImU32 friendlyEspColor;                             // Initialized in InitializeColors()
+    ImU32 enemyEspColor;                                // Initialized in InitializeColors()
+    ImU32 espVisibleColor;                              // Initialized in InitializeColors()
+    ImU32 espOccludedColor;                             // Initialized in InitializeColors()
+
+
+    // --- Numerical Settings & Other Parameters ---
+
+    // ESP & Visuals
+    float glowEspIntensity = 0.5f;
+    float healthBarWidth = 5.0f;
+    float headDotRadius = 3.0f;
+    float cornerEspBoxThickness = 1.5f;
+    float fovCircleRadius = 100.0f;
+    float distanceUnitConversion = 100.0f; // Example: If game units are cm, 100.0f makes distance display in meters
+    float mainEspBoxThickness = 2.0f;
+    float cornerFraction = 0.2f;      // Percentage of box side for corner ESP
+    ImVec2 snaplineOrigin = ImVec2(0.5f, 0.0f); // Default to Top-Center screen (0.5f for X means horizontal center, 0.0f for Y means top)
+
+    // Aimbot
+    float aimbotFov = 30.0f;
+    float aimbotSmoothness = 0.5f;
+
+
+    // --- Initialization Function ---
+    void InitializeColors() {
+        textEspColor = IM_COL32(255, 255, 255, 255);    // White
+        glowColor = IM_COL32(255, 0, 0, 150);           // Red, semi-transparent
+        healthBarHighColor = IM_COL32(0, 255, 0, 255);  // Green
+        healthBarMidColor = IM_COL32(255, 255, 0, 255); // Yellow
+        healthBarLowColor = IM_COL32(255, 0, 0, 255);   // Red
+        snaplineColor = IM_COL32(255, 255, 255, 100);   // White, somewhat transparent
+        headDotColor = IM_COL32(255, 0, 0, 255);        // Red
+        fovCircleColor = IM_COL32(255, 255, 255, 100);  // White, somewhat transparent
+        lineToEnemyColor = IM_COL32(255, 0, 0, 180);    // Red, mostly opaque
+        friendlyEspColor = IM_COL32(0, 255, 0, 255);    // Green for friendlies
+        enemyEspColor = IM_COL32(255, 0, 0, 255);       // Red for enemies
+        espVisibleColor = IM_COL32(0, 255, 0, 255);     // Green (example, could be enemyEspColor)
+        espOccludedColor = IM_COL32(255, 165, 0, 180);  // Orange, somewhat transparent (example)
+        gadgetEspColor = IM_COL32(0, 150, 255, 200);    // Blue-ish
+        vehicleEspColor = IM_COL32(255, 255, 0, 200);   // Yellow-ish
+    }
+
+
+} 
+
+void setup_skeet_style() {
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowPadding = ImVec2(10, 10);
+    style.FramePadding = ImVec2(8, 4);
+    style.ItemSpacing = ImVec2(8, 6);
+    style.ItemInnerSpacing = ImVec2(6, 6);
+    style.ScrollbarSize = 12.0f;
+    style.GrabMinSize = 10.0f;
+    style.WindowBorderSize = 0.0f;
+    style.FrameBorderSize = 0.0f;
+    style.PopupBorderSize = 0.0f;
+    style.FrameRounding = 4.0f;
+    style.GrabRounding = 4.0f;
+    style.ScrollbarRounding = 4.0f;
+    style.WindowRounding = 6.0f;
+
+    ImVec4* colors = style.Colors;
+    colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
+    colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+    colors[ImGuiCol_WindowBg] = ImVec4(0.10f, 0.10f, 0.12f, 0.95f);
+    colors[ImGuiCol_ChildBg] = ImVec4(0.12f, 0.12f, 0.14f, 0.90f);
+    colors[ImGuiCol_PopupBg] = ImVec4(0.12f, 0.12f, 0.14f, 0.94f);
+    colors[ImGuiCol_Border] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    colors[ImGuiCol_FrameBg] = ImVec4(0.15f, 0.15f, 0.17f, 1.00f);
+    colors[ImGuiCol_FrameBgHovered] = ImVec4(0.20f, 0.20f, 0.25f, 0.80f);
+    colors[ImGuiCol_FrameBgActive] = ImVec4(0.25f, 0.25f, 0.30f, 1.00f);
+    colors[ImGuiCol_TitleBg] = ImVec4(0.08f, 0.08f, 0.10f, 1.00f);
+    colors[ImGuiCol_TitleBgActive] = ImVec4(0.10f, 0.10f, 0.12f, 1.00f);
+    colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.08f, 0.08f, 0.10f, 0.75f);
+    colors[ImGuiCol_MenuBarBg] = ImVec4(0.15f, 0.15f, 0.17f, 0.90f);
+    colors[ImGuiCol_ScrollbarBg] = ImVec4(0.08f, 0.08f, 0.10f, 0.90f);
+    colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.15f, 0.15f, 0.17f, 1.00f);
+    colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.20f, 0.40f, 0.50f, 1.00f);
+    colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.25f, 0.45f, 0.55f, 1.00f);
+    colors[ImGuiCol_CheckMark] = ImVec4(0.20f, 0.40f, 0.50f, 1.00f);
+    colors[ImGuiCol_SliderGrab] = ImVec4(0.20f, 0.40f, 0.50f, 1.00f);
+    colors[ImGuiCol_SliderGrabActive] = ImVec4(0.25f, 0.45f, 0.55f, 1.00f);
+    colors[ImGuiCol_Button] = ImVec4(0.15f, 0.15f, 0.17f, 1.00f);
+    colors[ImGuiCol_ButtonHovered] = ImVec4(0.20f, 0.40f, 0.50f, 1.00f);
+    colors[ImGuiCol_ButtonActive] = ImVec4(0.25f, 0.45f, 0.55f, 1.00f);
+    colors[ImGuiCol_Header] = ImVec4(0.15f, 0.15f, 0.17f, 1.00f);
+    colors[ImGuiCol_HeaderHovered] = ImVec4(0.20f, 0.40f, 0.50f, 1.00f);
+    colors[ImGuiCol_HeaderActive] = ImVec4(0.25f, 0.45f, 0.55f, 1.00f);
+    colors[ImGuiCol_Separator] = ImVec4(0.20f, 0.20f, 0.22f, 1.00f);
+    colors[ImGuiCol_SeparatorHovered] = ImVec4(0.20f, 0.40f, 0.50f, 1.00f);
+    colors[ImGuiCol_SeparatorActive] = ImVec4(0.25f, 0.45f, 0.55f, 1.00f);
+    colors[ImGuiCol_ResizeGrip] = ImVec4(0.15f, 0.15f, 0.17f, 0.75f);
+    colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.20f, 0.40f, 0.50f, 1.00f);
+    colors[ImGuiCol_ResizeGripActive] = ImVec4(0.25f, 0.45f, 0.55f, 1.00f);
+    colors[ImGuiCol_Tab] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    colors[ImGuiCol_TabHovered] = ImVec4(0.20f, 0.40f, 0.50f, 1.00f);
+    colors[ImGuiCol_TabActive] = ImVec4(0.15f, 0.30f, 0.40f, 1.00f);
+    colors[ImGuiCol_TabUnfocused] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.10f, 0.10f, 0.12f, 1.0f);
+    colors[ImGuiCol_PlotLines] = ImVec4(0.20f, 0.40f, 0.50f, 1.00f);
+    colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.25f, 0.50f, 0.60f, 1.00f);
+    colors[ImGuiCol_PlotHistogram] = ImVec4(0.20f, 0.40f, 0.50f, 1.00f);
+    colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.25f, 0.50f, 0.60f, 1.00f);
+    colors[ImGuiCol_TextSelectedBg] = ImVec4(0.20f, 0.40f, 0.50f, 0.50f);
+    colors[ImGuiCol_DragDropTarget] = ImVec4(0.20f, 0.40f, 0.50f, 0.90f);
+    colors[ImGuiCol_NavHighlight] = ImVec4(0.20f, 0.40f, 0.50f, 1.00f);
+    colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
+    colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+    colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.10f, 0.10f, 0.12f, 0.75f);
+}
+
+// Helper function for ImGui::ColorEdit4 with ImU32
+void ColorEdit4U32(const char* label, ImU32& colorU32, const char* tooltip = nullptr) {
+    ImVec4 colorVec4 = ImGui::ColorConvertU32ToFloat4(colorU32);
+    if (ImGui::ColorEdit4(label, &colorVec4.x, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+        colorU32 = ImGui::ColorConvertFloat4ToU32(colorVec4);
+    }
+    ImGui::SameLine(); ImGui::TextUnformatted(label); // Manual label
+    if (tooltip && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup | ImGuiHoveredFlags_AllowWhenOverlapped)) ImGui::SetTooltip(tooltip);
+}
+
+// Helper function for ImGui::ColorEdit4 with ImColor
+void ColorEdit4ImColor(const char* label, ImColor& colorIm, const char* tooltip = nullptr) {
+    ImVec4 tempColor = colorIm;
+    if (ImGui::ColorEdit4(label, &tempColor.x, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+        colorIm = ImColor(tempColor);
+    }
+    ImGui::SameLine(); ImGui::TextUnformatted(label); // Manual label
+    if (tooltip && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup | ImGuiHoveredFlags_AllowWhenOverlapped)) ImGui::SetTooltip(tooltip);
+}
+
+// Helper for float array colors
+void ColorEdit3Float(const char* label, float col[3], const char* tooltip = nullptr) {
+    if (ImGui::ColorEdit3(label, col, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel)) {
+        // Value changed
+    }
+    ImGui::SameLine(); ImGui::TextUnformatted(label); // Manual label
+    if (tooltip && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup | ImGuiHoveredFlags_AllowWhenOverlapped)) ImGui::SetTooltip(tooltip);
+}
+
+
+namespace overlay {
+
+    void draw_gui() {
+        if (!overlay::enabled) return;
+
+        setup_skeet_style();
+
+        ImGui::SetNextWindowSize(ImVec2(900, 750), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Killuano Ud Menu", &overlay::enabled, ImGuiWindowFlags_NoCollapse);
+
+        ImGuiStyle& style = ImGui::GetStyle();
+
+        ImGui::TextColored(ImVec4(0.20f, 0.40f, 0.50f, 1.00f), "DeltaForce");
+        ImGui::Separator();
+
+        ImGui::BeginChild("Sidebar", ImVec2(200, ImGui::GetContentRegionAvail().y - (ImGui::GetTextLineHeightWithSpacing() + style.FramePadding.y * 2.0f + style.ItemSpacing.y)), true, ImGuiWindowFlags_NoScrollbar);
+        static int selectedTab = 0;
+        const char* tabNames[] = { "Aimbot", "Player ESP", "World ESP", "Chams & Glow", "Colors", "Misc" }; // Updated tabs
+        float button_width = ImGui::GetContentRegionAvail().x - style.WindowPadding.x;
+
+        for (int i = 0; i < IM_ARRAYSIZE(tabNames); ++i) {
+            bool is_selected = (selectedTab == i);
+            if (is_selected) {
+                ImGui::PushStyleColor(ImGuiCol_Button, style.Colors[ImGuiCol_TabActive]);
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, style.Colors[ImGuiCol_TabActive]);
+            }
+
+            if (ImGui::Button(tabNames[i], ImVec2(button_width, 30))) {
+                selectedTab = i;
+            }
+
+            if (is_selected) {
+                ImGui::PopStyleColor(2);
+            }
+        }
+        ImGui::EndChild();
+        ImGui::SameLine();
+
+        ImGui::BeginChild("Content", ImVec2(0, ImGui::GetContentRegionAvail().y - (ImGui::GetTextLineHeightWithSpacing() + style.FramePadding.y * 2.0f + style.ItemSpacing.y)), true);
+
+        if (selectedTab == 0) { // Aimbot tab
+            ImGui::TextColored(ImVec4(0.20f, 0.40f, 0.50f, 1.00f), "Aimbot Settings");
+            ImGui::Separator();
+            ImGui::Checkbox("Enable Aimbot", &aimbotEnabled);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Toggles aimbot functionality.");
+            ImGui::Text("Aimbot Status: %s", aimbotEnabled ? "Enabled" : "Disabled");
+            ImGui::SliderFloat("Aimbot FOV", &aimbotFov, 10.0f, 180.0f, "%.1f degrees");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Field of view for aimbot targeting.");
+            ImGui::SliderFloat("Aimbot Smoothness", &aimbotSmoothness, 0.0f, 1.0f, "%.2f");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Adjusts aimbot smoothing (0 = no smooth, 1 = very smooth).");
+            ImGui::Checkbox("Disable if Flashed", &disableAimbotFlashed);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Disables aimbot when local player is flashed.");
+            ImGui::Checkbox("Disable if Enemy in Smoke", &disableAimbotSmoke);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Disables aimbot when target is obscured by smoke.");
+            ImGui::Checkbox("Disable if Jumping", &disableAimbotJump);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Disables aimbot when local player is jumping.");
+
+            ImGui::Separator();
+            ImGui::Text("Triggerbot");
+            ImGui::Checkbox("Enable Triggerbot", &triggerbotEnabled);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Automatically shoots when crosshair is on a valid target.");
+
+            ImGui::Separator();
+            ImGui::Text("Hotkey (Info): Insert toggles main overlay menu.");
+
+        }
+        else if (selectedTab == 1) { // Player ESP Tab
+            ImGui::TextColored(ImVec4(0.20f, 0.40f, 0.50f, 1.00f), "Player ESP Settings");
+            ImGui::Separator();
+            ImGui::Checkbox("Enable Master ESP", &espEnabled);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Master switch for all ESP features.");
+            ImGui::Text("ESP Status: %s", espEnabled ? "Enabled" : "Disabled");
+            ImGui::Separator();
+
+            ImGui::Text("Boxes & Outlines");
+            ImGui::Checkbox("Full Box ESP", &mainEspBoxEnabled);
+            if (mainEspBoxEnabled) {
+               // ImGui::SameLine(); ImGui::SliderFloat("##BoxThick", &mainEspBoxThickness, 0.5f, 5.0f, "Thick: %.1f");
+            }
+            ImGui::Checkbox("Corner Box ESP", &cornerEspBoxEnabled);
+            if (cornerEspBoxEnabled) {
+                ImGui::SameLine(); ImGui::SliderFloat("##CornerThick", &cornerEspBoxThickness, 0.5f, 5.0f, "Thick: %.1f");
+                ImGui::SameLine(); ImGui::SliderFloat("##CornerFrac", &cornerFraction, 0.05f, 0.5f, "Frac: %.2f");
+            }
+            ImGui::Checkbox("Bone ESP (Skeleton)", &boneEspEnabled);
+            ImGui::Separator();
+
+            ImGui::Text("Information");
+            ImGui::Checkbox("Name ESP", &nameEspEnabled);
+            ImGui::Checkbox("Health (Text)", &healthTextEnabled);
+            ImGui::Checkbox("Health Bar", &healthBarEnabled);
+            if (healthBarEnabled) {
+                ImGui::SameLine(); ImGui::SliderFloat("##HealthBarW", &healthBarWidth, 1.0f, 10.0f, "Width: %.1fpx");
+            }
+            ImGui::Checkbox("Distance ESP", &distanceEspEnabled);
+            if (distanceEspEnabled) {
+                ImGui::SameLine(); ImGui::InputFloat("##DistUnit", &distanceUnitConversion, 1.0f, 10.0f, "Unit Conv: %.1f");
+            }
+            ImGui::Separator();
+
+            ImGui::Text("Indicators");
+            ImGui::Checkbox("Head Dot", &headDotEnabled);
+            if (headDotEnabled) {
+                ImGui::SameLine(); ImGui::SliderFloat("##HeadDotRad", &headDotRadius, 1.0f, 10.0f, "Radius: %.1fpx");
+            }
+            ImGui::Checkbox("Snaplines", &snaplinesEnabled);
+            // Snapline origin is dynamic
+
+        }
+        else if (selectedTab == 2) { // World ESP Tab
+            ImGui::TextColored(ImVec4(0.20f, 0.40f, 0.50f, 1.00f), "World & Screen ESP Settings");
+            ImGui::Separator();
+
+            ImGui::Text("Gadget ESP");
+            ImGui::Checkbox("Enable Gadget ESP", &gadgetEspEnabled);
+            if (gadgetEspEnabled) {
+                ImGui::Indent();
+                ImGui::Checkbox("Show Gadget Name", &showGadgetName);
+                ImGui::Checkbox("Show Gadget Distance", &showGadgetDistance);
+                ImGui::Unindent();
+            }
+            ImGui::Separator();
+
+            ImGui::Text("Vehicle ESP");
+            ImGui::Checkbox("Enable Vehicle ESP", &vehicleEspEnabled);
+            if (vehicleEspEnabled) {
+                ImGui::Indent();
+                ImGui::Checkbox("Show Vehicle Name", &showVehicleName);
+                ImGui::Checkbox("Show Vehicle Distance", &showVehicleDistance);
+                ImGui::Checkbox("Show Vehicle Rider(s)", &showVehicleRider);
+                ImGui::Unindent();
+            }
+            ImGui::Separator();
+
+            ImGui::Text("Screen Overlays");
+            ImGui::Checkbox("Aim FOV Circle", &fovCircleEnabled);
+            if (fovCircleEnabled) {
+                ImGui::SameLine(); ImGui::SliderFloat("##FOVCircRad", &fovCircleRadius, 10.0f, 500.0f, "Radius: %.1fpx");
+            }
+            ImGui::Checkbox("Line to Closest Enemy", &lineToClosestEnemyEnabled);
+            ImGui::Checkbox("Enable Radar", &radarEnabled);
+            if (radarEnabled) {
+                // Add radar specific settings here if any (e.g., radar_x, radar_y, radar_size, radar_alpha)
+                ImGui::Text("  (Radar customization options TBD)");
+            }
+
+        }
+        else if (selectedTab == 3) { // Chams & Glow Tab
+            ImGui::TextColored(ImVec4(0.20f, 0.40f, 0.50f, 1.00f), "Chams & Glow Settings");
+            ImGui::Separator();
+
+            ImGui::Text("Player Glow");
+            ImGui::Checkbox("Player Glow ESP", &glowEspEnabled);
+            if (glowEspEnabled) {
+                ImGui::SameLine(); ImGui::SliderFloat("##GlowInt", &glowEspIntensity, 0.1f, 2.0f, "Intensity: %.2f");
+            }
+            ImGui::Separator();
+
+            ImGui::Text("Weapon Chams");
+            ImGui::Checkbox("Weapon Chams", &weaponChamsEnabled);
+            // Color for weapon chams will be in the "Colors" tab
+
+        }
+        else if (selectedTab == 4) { // Colors Tab
+            ImGui::TextColored(ImVec4(0.20f, 0.40f, 0.50f, 1.00f), "Color Settings");
+            ImGui::Separator();
+
+            ImGui::Text("General ESP Colors");
+            ImGui::Indent();
+            ColorEdit3Float("Fallback ESP Color", espColor, "General ESP color if not overridden.");
+            ColorEdit4U32("Text Color", textEspColor, "Color for ESP text (Name, Distance, Health).");
+            ColorEdit4U32("Friendly Color", friendlyEspColor, "Color for friendly entities.");
+            ColorEdit4U32("Enemy Color", enemyEspColor, "Color for enemy entities.");
+            ColorEdit4U32("Visible Color", espVisibleColor, "Color for visible entities.");
+            ColorEdit4U32("Occluded Color", espOccludedColor, "Color for occluded (behind wall) entities.");
+            ImGui::Unindent();
+            ImGui::Separator();
+
+            ImGui::Text("Player ESP Element Colors");
+            ImGui::Indent();
+            ColorEdit3Float("Full Box Color", mainEspBoxColor);
+            ColorEdit3Float("Corner Box Color", cornerEspBoxColor);
+            ColorEdit4U32("Head Dot Color", headDotColor);
+            ColorEdit4U32("Snapline Color", snaplineColor);
+            ColorEdit4U32("Player Glow Color", glowColor, "Color for the player glow effect.");
+            ImGui::Text("Health Bar Colors:");
+            ImGui::Indent();
+            ColorEdit4U32("High Health", healthBarHighColor);
+            ColorEdit4U32("Mid Health", healthBarMidColor);
+            ColorEdit4U32("Low Health", healthBarLowColor);
+            ImGui::Unindent();
+            ImGui::Unindent();
+            ImGui::Separator();
+
+            ImGui::Text("World ESP & Chams Colors");
+            ImGui::Indent();
+            ColorEdit4ImColor("Weapon Chams Color", weaponChamsColorImGui);
+            ColorEdit4U32("Gadget Color", gadgetEspColor);
+            ColorEdit4U32("Vehicle Color", vehicleEspColor);
+            ColorEdit4U32("FOV Circle Color", fovCircleColor);
+            ColorEdit4U32("Line to Enemy Color", lineToEnemyColor);
+            ImGui::Unindent();
+
+        }
+        else if (selectedTab == 5) { // Misc tab
+            ImGui::TextColored(ImVec4(0.20f, 0.40f, 0.50f, 1.00f), "Miscellaneous Settings");
+            ImGui::Separator();
+            ImGui::Checkbox("Bhop (Bunny Hop)", &bhopEnabled);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Enables automatic bunny hopping.");
+
+            ImGui::Checkbox("Teleport Items (DELETE Hotkey)", &teleport);
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("WARNING: This is a placeholder for a feature. Hotkey: DELETE (Example).");
+
+            // Add other misc features here
+        }
+        ImGui::EndChild();
+
+        ImGui::Separator();
+        float footer_height = ImGui::GetTextLineHeightWithSpacing() + style.FramePadding.y;
+        ImGui::SetCursorPosY(ImGui::GetWindowSize().y - footer_height - style.WindowPadding.y);
+        ImGui::Text("v0.0.0.02"); // Incremented version
+
+        ImGui::End();
+    }
+} // namespace overlay
+
+#define _CRT_SECURE_NO_WARNINGS
+#include "Windows.h"
+#include "ESP.h" // Assuming this header declares namespace ESP and its function prototypes
+#include "../Overlay/overlay.h"
+#include "../Utils/Game.h"
+#include "../Utils/Logger.h"
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <cmath> // For sqrtf, fabsf
+#include <cstdio>
+#include "Imgui.h" // Assuming this is your correct ImGui header include
+#include <cfloat>
+
+
+void ESP::RenderESP(ImDrawList* drawList) {
+
+    if (overlay::fovCircleEnabled) {
+        ImVec2 screenCenter(ImGui::GetIO().DisplaySize.x / 2.0f, ImGui::GetIO().DisplaySize.y / 2.0f);
+        drawList->AddCircle(screenCenter, overlay::fovCircleRadius, overlay::fovCircleColor, 100, 1.5f);
+    }
+
+    if (!overlay::espEnabled) {
+        return;
+    }
+
+    if (!Game::Player || !Game::GameplayStatics || !Game::World || !Game::Controller) {
+        return;
+    }
+
+    SDK::FVector playerLocation = Game::Player->K2_GetActorLocation();
+    auto* playerController = static_cast<SDK::APlayerController*>(Game::Controller);
+    if (!playerController) { // Added null check for playerController early
+        return;
+    }
+
+    SDK::TArray<SDK::AActor*> characterESPActors;
+    Game::GameplayStatics->GetAllActorsOfClass(Game::World, SDK::ACharacter::StaticClass(), &characterESPActors);
+
+    for (int i = 0; i < characterESPActors.Num(); ++i) {
+        if (!characterESPActors.IsValidIndex(i)) continue;
+        SDK::AActor* actor = characterESPActors[i];
+        if (!actor || actor == Game::Player) continue;
+        SDK::ACharacter* character = static_cast<SDK::ACharacter*>(actor);
+        if (!character || !character->Mesh) continue;
+
+        auto* mesh = character->Mesh;
+        const char* headSocketName = "Bip001-Head"; // Using variables for socket names
+        const char* rootSocketName = "Root";
+
+        SDK::FName headFName = Game::ToName(headSocketName);
+        SDK::FName rootFName = Game::ToName(rootSocketName);
+
+        if (!mesh->DoesSocketExist(headFName) || !mesh->DoesSocketExist(rootFName)) continue;
+
+        SDK::FVector headLoc = mesh->GetSocketLocation(headFName);
+        SDK::FVector rootLoc = mesh->GetSocketLocation(rootFName);
+        SDK::FVector2D screenHead, screenRoot;
+
+        if (!(playerController->ProjectWorldLocationToScreen(headLoc, &screenHead, false) &&
+            playerController->ProjectWorldLocationToScreen(rootLoc, &screenRoot, false))) continue;
+
+
+        float espHeight = fabsf(screenHead.Y - screenRoot.Y);
+        float espWidth = espHeight * 0.55f; 
+        ImVec2 boxTopLeft(screenHead.X - espWidth / 2.0f, screenHead.Y);
+        ImVec2 boxBottomRight(screenHead.X + espWidth / 2.0f, screenRoot.Y);
+
+        if (boxTopLeft.y > boxBottomRight.y) {
+            std::swap(boxTopLeft.y, boxBottomRight.y);
+        }
+
+        if (overlay::boneEspEnabled) {
+            ImU32 boneColor = ImGui::GetColorU32(ImVec4(overlay::espColor[0], overlay::espColor[1], overlay::espColor[2], 0.9f));
+
+            for (const auto& conn : skeletonConnections) { 
+                SDK::FName bone1FName = Game::ToName(conn.bone1_name);
+                SDK::FName bone2FName = Game::ToName(conn.bone2_name);
+
+                if (mesh->DoesSocketExist(bone1FName) && mesh->DoesSocketExist(bone2FName)) {
+
+                    SDK::FVector p1_ws = mesh->GetSocketLocation(bone1FName);
+                    SDK::FVector p2_ws = mesh->GetSocketLocation(bone2FName);
+                    SDK::FVector2D s1_ss, s2_ss;
+
+                    if (playerController->ProjectWorldLocationToScreen(p1_ws, &s1_ss, false) &&
+                        playerController->ProjectWorldLocationToScreen(p2_ws, &s2_ss, false)) {
+                        drawList->AddLine(ImVec2(s1_ss.X, s1_ss.Y), ImVec2(s2_ss.X, s2_ss.Y), boneColor, 1.5f);
+                    }
+                }
+            }
+        }
+        if (overlay::mainEspBoxEnabled) {
+            drawList->AddRect(boxTopLeft, boxBottomRight, ImGui::GetColorU32(ImVec4(overlay::mainEspBoxColor[0], overlay::mainEspBoxColor[1], overlay::mainEspBoxColor[2], 1.0f)), 0.0f, ImDrawFlags_None, overlay::mainEspBoxThickness);
+        }
+        if (overlay::cornerEspBoxEnabled) {
+            ImU32 cColor = ImGui::GetColorU32(ImVec4(overlay::cornerEspBoxColor[0], overlay::cornerEspBoxColor[1], overlay::cornerEspBoxColor[2], 1.0f));
+            float line_w = espWidth * overlay::cornerFraction;  // Width of corner lines
+            float line_h = espHeight * overlay::cornerFraction; // Height of corner lines
+
+            drawList->AddLine(boxTopLeft, ImVec2(boxTopLeft.x + line_w, boxTopLeft.y), cColor, overlay::cornerEspBoxThickness);
+            drawList->AddLine(boxTopLeft, ImVec2(boxTopLeft.x, boxTopLeft.y + line_h), cColor, overlay::cornerEspBoxThickness);
+            ImVec2 topRight(boxBottomRight.x, boxTopLeft.y);
+
+            drawList->AddLine(topRight, ImVec2(topRight.x - line_w, topRight.y), cColor, overlay::cornerEspBoxThickness);
+            drawList->AddLine(topRight, ImVec2(topRight.x, topRight.y + line_h), cColor, overlay::cornerEspBoxThickness);
+            ImVec2 bottomLeft(boxTopLeft.x, boxBottomRight.y);
+
+            drawList->AddLine(bottomLeft, ImVec2(bottomLeft.x + line_w, bottomLeft.y), cColor, overlay::cornerEspBoxThickness);
+            drawList->AddLine(bottomLeft, ImVec2(bottomLeft.x, bottomLeft.y - line_h), cColor, overlay::cornerEspBoxThickness);
+
+            drawList->AddLine(boxBottomRight, ImVec2(boxBottomRight.x - line_w, boxBottomRight.y), cColor, overlay::cornerEspBoxThickness);
+            drawList->AddLine(boxBottomRight, ImVec2(boxBottomRight.x, boxBottomRight.y - line_h), cColor, overlay::cornerEspBoxThickness);
+        }
+        if (overlay::headDotEnabled) {
+            drawList->AddCircleFilled(ImVec2(screenHead.X, screenHead.Y), overlay::headDotRadius, overlay::headDotColor);
+        }
+
+        float currentTextY = boxTopLeft.y - 2.0f; 
+        if (overlay::nameEspEnabled) {
+            std::string nameStr = character->GetName(); 
+            ImVec2 textSize = ImGui::CalcTextSize(nameStr.c_str());
+            currentTextY -= textSize.y; 
+            drawList->AddText(ImVec2(boxTopLeft.x + espWidth / 2.0f - textSize.x / 2.0f, currentTextY), overlay::textEspColor, nameStr.c_str());
+        }
+
+        if (overlay::distanceEspEnabled) {
+            SDK::FVector characterLocation = character->K2_GetActorLocation();
+            float distanceInGameUnits = SDK::UKismetMathLibrary::Vector_Distance(playerLocation, characterLocation);
+            std::string distStr = std::to_string(static_cast<int>(distanceInGameUnits / overlay::distanceUnitConversion)) + "m";
+            ImVec2 distTextSize = ImGui::CalcTextSize(distStr.c_str());
+       
+            drawList->AddText(ImVec2(boxTopLeft.x + espWidth / 2.0f - distTextSize.x / 2.0f, boxBottomRight.y + 2.0f), overlay::textEspColor, distStr.c_str());
+        }
+
+        if (overlay::snaplinesEnabled) {
+            ImVec2 snaplineStartPoint = overlay::snaplineOrigin;
+            if (snaplineStartPoint.x == 0.f && snaplineStartPoint.y == 0.f) {
+                snaplineStartPoint = ImVec2(ImGui::GetIO().DisplaySize.x / 2.f, ImGui::GetIO().DisplaySize.y);
+            }
+            drawList->AddLine(snaplineStartPoint, ImVec2(boxTopLeft.x + espWidth / 2.f, boxBottomRight.y), overlay::snaplineColor, 1.0f);
+        }
+      
+    }
+
+    
+}
+
+
+//void ESP::RenderGadgetESP(ImDrawList* drawList, SDK::ANkGadget* gadget, const SDK::FVector& PlayerLocation) {
+//    if (!gadget || !Game::Controller) { // Game::Controller check is important for playerController
+//        return;
+//    }
+//
+//    SDK::FVector gadgetLoc = gadget->K2_GetActorLocation();
+//    SDK::FVector2D screenLoc;
+//
+//    auto* playerController = static_cast<SDK::APlayerController*>(Game::Controller);
+//    if (!playerController) {
+//        return;
+//    }
+//
+//    if (playerController->ProjectWorldLocationToScreen(gadgetLoc, &screenLoc, false)) {
+//        drawList->AddCircleFilled(ImVec2(screenLoc.X, screenLoc.Y), 4.0f, overlay::gadgetEspColor);
+//
+//        float currentTextY = screenLoc.Y + 6.0f;
+//
+//        if (overlay::showGadgetName) {
+//            std::string nameStr = "Gadget";
+//            std::string fullName = gadget->GetFullName();
+//            if (!fullName.empty()) {
+//                size_t lastDot = fullName.rfind('.');
+//                if (lastDot != std::string::npos) {
+//                    nameStr = fullName.substr(lastDot + 1);
+//                }
+//                else {
+//                    nameStr = fullName;
+//                }
+//                if (nameStr.length() > 30) {
+//                    nameStr = nameStr.substr(0, 27) + "...";
+//                }
+//            }
+//            ImVec2 nameSize = ImGui::CalcTextSize(nameStr.c_str());
+//            drawList->AddText(ImVec2(screenLoc.X - nameSize.x / 2.0f, currentTextY), overlay::textEspColor, nameStr.c_str());
+//            currentTextY += nameSize.y + 2.0f;
+//        }
+//
+//        if (overlay::showGadgetDistance) {
+//            float distanceToGadget = SDK::UKismetMathLibrary::Vector_Distance(PlayerLocation, gadgetLoc);
+//            std::string distStr = std::to_string(static_cast<int>(distanceToGadget / overlay::distanceUnitConversion)) + "m";
+//            ImVec2 distSize = ImGui::CalcTextSize(distStr.c_str());
+//            drawList->AddText(ImVec2(screenLoc.X - distSize.x / 2.0f, currentTextY), overlay::textEspColor, distStr.c_str());
+//        }
+//    }
+//}
+//
+//void ESP::RenderAllGadgetsESP(ImDrawList* drawList) {
+//    if (!Game::World || !Game::GameplayStatics || !Game::Player || !Game::Controller) {
+//        return;
+//    }
+//
+//    SDK::FVector playerLocation = Game::Player->K2_GetActorLocation();
+//    auto* playerController = static_cast<SDK::APlayerController*>(Game::Controller);
+//    if (!playerController) { 
+//        return;
+//    }
+//
+//    SDK::TArray<SDK::AActor*> gadgetActors;
+//    Game::GameplayStatics->GetAllActorsOfClass(Game::World, SDK::ANkGadget::StaticClass(), &gadgetActors);
+//
+//    for (int k = 0; k < gadgetActors.Num(); ++k) {
+//        if (!gadgetActors.IsValidIndex(k)) {
+//            continue;
+//        }
+//        SDK::AActor* actor = gadgetActors[k];
+//        if (!actor) {
+//            continue;
+//        }
+//        SDK::ANkGadget* gadget = static_cast<SDK::ANkGadget*>(actor);
+//        if (gadget) {
+//            ESP::RenderGadgetESP(drawList, gadget, playerLocation);
+//        }
+//    }
+//}
+
+
+void Teleport() {
+
+    if (!Game::Player || !Game::GameplayStatics || !Game::World || !Game::Controller || overlay::teleport) { // Original condition
+        return;
+    }
+
+    SDK::FVector playerLocation = Game::Player->K2_GetActorLocation();
+
+    if (GetAsyncKeyState(VK_DELETE) & 1 && overlay::teleport) {
+        SDK::TArray<SDK::AActor*> enemyActors;
+        Game::GameplayStatics->GetAllActorsOfClass(Game::World, SDK::ACharacter::StaticClass(), &enemyActors);
+        int enemiesTeleported = 0;
+        const int MAX_ENEMIES_TO_TELEPORT = 50;
+
+        for (int i = 0; i < enemyActors.Num(); i++) {
+            if (enemiesTeleported >= MAX_ENEMIES_TO_TELEPORT) break;
+            if (!enemyActors.IsValidIndex(i)) continue;
+            SDK::AActor* actorToCheck = enemyActors[i];
+            if (!actorToCheck || actorToCheck == Game::Player) continue;
+            SDK::ACharacter* enemyCharacter = static_cast<SDK::ACharacter*>(actorToCheck);
+            if (!enemyCharacter) continue;
+            enemyCharacter->K2_SetActorLocation(playerLocation, false, nullptr, true);
+             enemiesTeleported++;
+        }
+    }
+
+    if (GetAsyncKeyState(VK_F6) & 1 && overlay::teleport) {
+        SDK::TArray<SDK::AActor*> dropItemActors;
+        Game::GameplayStatics->GetAllActorsOfClass(Game::World, SDK::ANkDrop::StaticClass(), &dropItemActors);
+        int dropsTeleported = 0;
+        const int MAX_DROPS_TO_TELEPORT = 100;
+
+        SDK::FVector playerForwardForItemSpread = Game::Player->GetActorForwardVector();
+        playerForwardForItemSpread.Normalize();
+        SDK::FVector playerRightForItemSpread = SDK::FVector::CrossProduct(playerForwardForItemSpread, SDK::FVector(0, 0, 1)); // Assuming Z is up
+        playerRightForItemSpread.Normalize();
+
+        const float ITEM_DISTANCE_IN_FRONT = 100.0f;
+        const float ITEM_SPREAD_WIDTH = 500.0f;
+        const int ITEMS_PER_ITEM_ROW = 10;
+
+        for (int i = 0; i < dropItemActors.Num(); i++) {
+            if (dropsTeleported >= MAX_DROPS_TO_TELEPORT) break;
+            if (!dropItemActors.IsValidIndex(i)) continue;
+            SDK::AActor* itemActor = dropItemActors[i];
+            if (!itemActor) continue;
+
+            int column = dropsTeleported % ITEMS_PER_ITEM_ROW;
+            int layer = dropsTeleported / ITEMS_PER_ITEM_ROW; // Renamed from 'row' in your original comment to 'layer' for clarity with ITEMS_PER_ITEM_ROW
+            float horizontalRatio = (ITEMS_PER_ITEM_ROW > 1) ? (static_cast<float>(column) / (ITEMS_PER_ITEM_ROW - 1.0f)) - 0.5f : 0.0f; // Centered
+            SDK::FVector basePos = playerLocation + (playerForwardForItemSpread * (ITEM_DISTANCE_IN_FRONT + (float)layer * 60.f)); // Item rows move further away
+            SDK::FVector targetLocation = basePos + (playerRightForItemSpread * (horizontalRatio * ITEM_SPREAD_WIDTH));
+            targetLocation.Z += 20.0f + (float)layer * 15.f; // Stack items vertically in deeper layers
+            itemActor->K2_SetActorLocation(targetLocation, false, nullptr, true);
+            dropsTeleported++;
+        }
+    }
+
+    if (GetAsyncKeyState(VK_F7) & 1 && overlay::teleport) {
+        SDK::TArray<SDK::AActor*> allGadgetActors;
+        Game::GameplayStatics->GetAllActorsOfClass(Game::World, SDK::ANkGadget::StaticClass(), &allGadgetActors);
+        int gadgetsTeleportedCount = 0;
+        const int MAX_GADGETS_TO_TELEPORT = 100;
+        std::vector<SDK::ANkGadget*> teleportableGadgetsList; // Using std::vector for dynamic list
+
+        SDK::FVector playerForwardForGadgetSpread = Game::Player->GetActorForwardVector();
+        playerForwardForGadgetSpread.Normalize();
+        // Collect gadgets first (your filtering logic was 'isConsideredTeleportable = true;' - adjust if needed)
+        for (int i = 0; i < allGadgetActors.Num(); i++) {
+            if (!allGadgetActors.IsValidIndex(i)) continue;
+            SDK::ANkGadget* gadget = static_cast<SDK::ANkGadget*>(allGadgetActors[i]);
+            if (!gadget) continue;
+
+            teleportableGadgetsList.push_back(gadget);
+        }
+
+        const float GADGET_DISTANCE_IN_FRONT = 150.0f;
+        const float GADGET_SPREAD_WIDTH = 800.0f;
+        const float GADGET_ROW_DEPTH_SPACING = 105.0f; // How far back each new "row" of gadgets is
+        const float GADGET_VERTICAL_BASE_OFFSET = 25.0f; // Base height off the ground
+        const float GADGET_VERTICAL_ITEM_SPACING = 5.0f; // Additional vertical spacing within a layer/column
+        const int GADGETS_PER_HORIZONTAL_LINE = 10; // How many gadgets before starting a new "line" further back
+
+        SDK::FVector playerRightForGadgetSpread = SDK::FVector::CrossProduct(playerForwardForGadgetSpread, SDK::FVector(0, 0, 1)); // Assuming Z is up
+        playerRightForGadgetSpread.Normalize();
+
+        for (SDK::ANkGadget* gadgetToTeleport : teleportableGadgetsList) {
+            if (gadgetsTeleportedCount >= MAX_GADGETS_TO_TELEPORT) break;
+
+            int column = gadgetsTeleportedCount % GADGETS_PER_HORIZONTAL_LINE;
+            int layer = gadgetsTeleportedCount / GADGETS_PER_HORIZONTAL_LINE; // Which "depth layer" the gadget is in
+
+            float horizontalRatio = (GADGETS_PER_HORIZONTAL_LINE > 1) ? (static_cast<float>(column) / (GADGETS_PER_HORIZONTAL_LINE - 1.0f)) - 0.5f : 0.0f; // -0.5 to 0.5 for centering
+
+            SDK::FVector baseTeleportPosLayer = playerLocation + (playerForwardForGadgetSpread * (GADGET_DISTANCE_IN_FRONT + (static_cast<float>(layer) * GADGET_ROW_DEPTH_SPACING)));
+            SDK::FVector targetLocation = baseTeleportPosLayer + (playerRightForGadgetSpread * (horizontalRatio * GADGET_SPREAD_WIDTH));
+
+            // Slightly more complex Z calculation from your code, preserved:
+            targetLocation.Z += GADGET_VERTICAL_BASE_OFFSET +
+                (static_cast<float>(layer) * GADGET_VERTICAL_ITEM_SPACING * 2.0f) +
+                (static_cast<float>(column % 3) * GADGET_VERTICAL_ITEM_SPACING * 0.5f);
+
+            gadgetToTeleport->K2_SetActorLocation(targetLocation, false, nullptr, true);
+            gadgetsTeleportedCount++;
+        }
+    }
+}
